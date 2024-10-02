@@ -10,6 +10,10 @@ const config: Config = {
   theme: {
   	extend: {
   		colors: {
+			primarydark: "#468c80",
+			zupass: "#19473f",
+			accentdark: "#fcd270",
+			accentdarker: "#f4c24d",
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',
   			card: {
