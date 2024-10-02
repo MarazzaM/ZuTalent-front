@@ -5,6 +5,7 @@ import { usePrivy } from '@privy-io/react-auth';
 import { Button } from "@/components/ui/button";
 import dynamic from 'next/dynamic';
 import { useQuery } from '@tanstack/react-query';
+import Swal from 'sweetalert2';
 
 const DynamicWrapper = dynamic(() => import('@/components/zupass/POD/Wrapper'), {
   ssr: false,
@@ -14,10 +15,21 @@ const DynamicWrapper = dynamic(() => import('@/components/zupass/POD/Wrapper'), 
 // Function to fetch passport data
 const fetchPassport = async (walletAddress: string) => {
   const response = await fetch(`${process.env.NEXT_PUBLIC_JUPITER_API_URL}/score/passport/${walletAddress}`);
+  const data = await response.json();
+  
   if (!response.ok) {
-    throw new Error('Network response was not ok');
+    if (data.statusCode === 400 && data.message.includes("Insufficient score")) {
+      Swal.fire({
+        title: 'Insufficient Score',
+        text: 'Your score is not high enough. The minimum required score is 20.',
+        icon: 'warning',
+        confirmButtonText: 'OK'
+      });
+    }
+    throw new Error(data.message || 'Network response was not ok');
   }
-  return response.json();
+  
+  return data;
 };
 
 function Page() {
@@ -30,7 +42,7 @@ function Page() {
     queryFn: () => fetchPassport(user?.wallet?.address || ''),
     enabled: !!user?.wallet?.address, // Only run the query if we have a wallet address
   });
-
+const score = passportData?.passport?.score;
   if (!ready) {
     return <div>Loading...</div>;
   }
@@ -54,7 +66,7 @@ function Page() {
       ) : passportData ? (
         <>
           <p>Passport data loaded successfully!</p>
-          {passportData.score > 20 ? (
+          {score > 20 ? (
             <>
               {!showZupass ? (
                 <Button onClick={() => setShowZupass(true)}>Connect Zupass</Button>
@@ -63,7 +75,7 @@ function Page() {
               )}
             </>
           ) : (
-            <p>Your score is not high enough to connect Zupass.</p>
+            <p>Your current score is {score}. Reach a score of 20 or higher to be able to obtain a ZuTalent.</p>
           )}
         </>
       ) : null}

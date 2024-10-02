@@ -34,7 +34,7 @@ export default function Navbar() {
     <nav className="bg-background p-4 shadow-md">
       <div className="container mx-auto flex items-center justify-between">
         <Link href="/" className="text-2xl font-bold text-primary">
-          Logo
+        ZuTalent
         </Link>
 
         {/* Mobile Menu */}

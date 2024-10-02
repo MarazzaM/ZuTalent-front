@@ -1,6 +1,7 @@
 import { ReactNode, StrictMode } from "react";
 import { getConnectionInfo } from "./hooks/utils";
-import { useParcnetClient, ParcnetClientProvider } from "./hooks/useParcnetClient";
+// import { useParcnetClient, ParcnetClientProvider } from "./hooks/useParcnetClient";
+import { ParcnetClientProvider } from "./hooks/useParcnetClient";
 import { PODSection } from "./POD";
 
 const zapp = {
@@ -9,7 +10,7 @@ const zapp = {
 };
 
 function Main({ wallet, token }: { wallet: string; token: string }): ReactNode {
-  const { connected } = useParcnetClient();
+  // const { connected } = useParcnetClient();
   return (
     <>
         <PODSection wallet={wallet} token={token} />
