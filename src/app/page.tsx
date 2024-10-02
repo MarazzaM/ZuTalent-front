@@ -29,7 +29,7 @@ const fetchPassport = async (walletAddress: string, getAccessToken: () => Promis
     if (data.statusCode === 400 && data.message.includes("Insufficient score")) {
       Swal.fire({
         title: 'Insufficient Score',
-        text: 'Your score is not high enough. The minimum required score is 20.',
+        text: `Your score is not high enough. The minimum required score is ${process.env.NEXT_PUBLIC_MIN_REQUIRED_SCORE}.`,
         icon: 'warning',
         confirmButtonText: 'OK'
       });
@@ -102,7 +102,7 @@ function Page() {
                   <p className="text-3xl mb-4">Your ZuTalent Score</p>
                   <p className="text-6xl font-bold text-accentdark">{score}</p>
                 </div>
-                {score > 20 ? (
+                {score > Number(process.env.NEXT_PUBLIC_MIN_REQUIRED_SCORE) ? (
                   <div className="mt-8">
                     {!showZupass ? (
                       <Button onClick={() => setShowZupass(true)} className="bg-accentdark text-zupass text-xl py-4 px-10 rounded-full hover:bg-accentdarker transition-colors">
@@ -113,7 +113,7 @@ function Page() {
                     )}
                   </div>
                 ) : (
-                  <p className="text-xl mt-8">Reach a score of 20 or higher to obtain a ZuTalent. Keep building your skills!</p>
+                  <p className="text-xl mt-8">Reach a score of {process.env.NEXT_PUBLIC_MIN_REQUIRED_SCORE} or higher to obtain a ZuTalent. Keep building your skills!</p>
                 )}
               </div>
             ) : null}
