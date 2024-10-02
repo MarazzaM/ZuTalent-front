@@ -102,7 +102,7 @@ function Page() {
                   <p className="text-3xl mb-4">Your ZuTalent Score</p>
                   <p className="text-6xl font-bold text-accentdark">{score}</p>
                 </div>
-                {score > Number(process.env.NEXT_PUBLIC_MIN_REQUIRED_SCORE) ? (
+                {score >= Number(process.env.NEXT_PUBLIC_MIN_REQUIRED_SCORE) ? (
                   <div className="mt-8">
                     {!showZupass ? (
                       <Button onClick={() => setShowZupass(true)} className="bg-accentdark text-zupass text-xl py-4 px-10 rounded-full hover:bg-accentdarker transition-colors">
