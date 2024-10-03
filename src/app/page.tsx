@@ -88,9 +88,6 @@ function Page() {
   });
   const score = passportData?.passport.score;
 
-  const MAX_SCORE = 40;
-  const normalizedScore = (score / MAX_SCORE) * 100; // Convert score to percentage
-
   return (
     <div className="bg-zupass min-h-screen overflow-hidden">
       <AnimatePresence mode="wait">
@@ -215,13 +212,13 @@ function Page() {
                   <div className="bg-gradient-to-br from-primarydark to-accentdark rounded-2xl p-8 shadow-lg flex items-center justify-between">
                     <div className="text-left">
                       <p className="text-2xl mb-2 text-zupass">Your ZuTalent Score</p>
-                      <p className="text-6xl font-bold text-zupass">{score}/{MAX_SCORE}</p>
+                      <p className="text-6xl font-bold text-zupass">{score}</p>
                     </div>
                     <div className="w-32 h-32">
                       <CircularProgressbar
-                        value={normalizedScore}
+                        value={score}
                         maxValue={100}
-                        text={`${Math.round(normalizedScore)}%`}
+                        text={`${score}%`}
                         styles={buildStyles({
                           textColor: '#ffffff',
                           pathColor: '#ffd700',
