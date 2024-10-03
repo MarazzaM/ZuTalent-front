@@ -1,11 +1,27 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { usePrivy } from '@privy-io/react-auth';
 import { Button } from "@/components/ui/button";
+import Image from 'next/image';
+import { motion, AnimatePresence } from 'framer-motion';
+// Import new components
+import { BackgroundBeams } from "@/components/ui/background-beams";
+import { TextGenerateEffect } from "@/components/ui/text-generate-effect";
+import { SparklesCore } from "@/components/ui/sparkles";
 import dynamic from 'next/dynamic';
 import { useQuery } from '@tanstack/react-query';
 import Swal from 'sweetalert2';
+import ProfileAvatar from "@/components/ui/ProfileAvatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Ticket, Plus, LogOut } from 'lucide-react';
+import { CircularProgressbar, buildStyles } from 'react-circular-progressbar';
+import 'react-circular-progressbar/dist/styles.css';
 
 const DynamicWrapper = dynamic(() => import('@/components/zupass/POD/Wrapper'), {
   ssr: false,
@@ -44,6 +60,17 @@ function Page() {
   const { login, ready, authenticated, user, logout, getAccessToken } = usePrivy();
   const [showZupass, setShowZupass] = useState(false);
   const [accessToken, setAccessToken] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    if (ready) {
+      const timer = setTimeout(() => {
+        setIsLoading(false);
+      }, 1500);
+
+      return () => clearTimeout(timer);
+    }
+  }, [ready]);
 
   // Updated query for fetching passport data
   const { data: passportData, isLoading: isPassportLoading, error: passportError } = useQuery({
@@ -61,69 +88,171 @@ function Page() {
   });
   const score = passportData?.passport.score;
 
-  if (!ready) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-zupass">
-        <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-accentdark"></div>
-      </div>
-    );
-  }
+  const MAX_SCORE = 40;
+  const normalizedScore = (score / MAX_SCORE) * 100; // Convert score to percentage
 
   return (
-    <div className="flex flex-col min-h-screen bg-zupass text-white">
-      <header className="p-6 flex justify-between items-center">
-        <div className="text-3xl font-bold text-accentdark">ZuTalent</div>
-        {authenticated && (
-          <Button onClick={() => logout()} className="bg-accentdark text-zupass hover:bg-accentdarker transition-colors">
-            Disconnect
-          </Button>
-        )}
-      </header>
+    <div className="bg-zupass min-h-screen overflow-hidden">
+      <AnimatePresence mode="wait">
+        {isLoading ? (
+          <motion.div
+            key="loader"
+            initial={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.5 }}
+            className="absolute inset-0 flex items-center justify-center bg-zupass"
+          >
+            <motion.div
+              animate={{
+                scale: [1, 2, 2, 1, 1],
+                rotate: [0, 0, 270, 270, 0],
+                borderRadius: ["20%", "20%", "50%", "50%", "20%"],
+              }}
+              transition={{
+                duration: 1.5,
+                ease: "easeInOut",
+                times: [0, 0.2, 0.5, 0.8, 1],
+                repeat: 0,
+              }}
+              className="w-32 h-32 bg-accentdark"
+            />
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
+      
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: isLoading ? 0 : 1 }}
+        transition={{ duration: 0.5 }}
+        className="relative flex flex-col min-h-screen bg-zupass text-white"
+      >
+        <BackgroundBeams />
+        <SparklesCore
+          id="tsparticles"
+          background="transparent"
+          minSize={0.6}
+          maxSize={1.4}
+          particleDensity={100}
+          className="w-full h-full absolute top-0 left-0 pointer-events-none"
+        />
 
-      <main className="flex-grow flex flex-col items-center justify-center p-8 text-center">
-        {!authenticated ? (
-          <div className="max-w-2xl mx-auto">
-            <h1 className="text-6xl font-bold mb-8 text-accentdark">Welcome to ZuTalent</h1>
-            <p className="text-2xl mb-12 text-accentdark">Unlock your potential with ZuTalent</p>
-            <Button onClick={() => login()} className="bg-accentdark text-zupass text-xl py-4 px-10 rounded-full hover:bg-accentdarker transition-colors">
-              Connect Wallet
-            </Button>
-          </div>
-        ) : (
-          <div className="max-w-2xl mx-auto">
-            <h1 className="text-5xl font-bold mb-8 text-accentdark">Your ZuTalent Dashboard</h1>
-            {isPassportLoading ? (
-              <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-accentdark"></div>
-            ) : passportError ? (
-              <p className="text-red-500">Error loading passport: {(passportError as Error).message}</p>
-            ) : passportData ? (
-              <div className="space-y-8">
-                <div className="bg-primarydark rounded-lg p-8 shadow-lg">
-                  <p className="text-3xl mb-4">Your ZuTalent Score</p>
-                  <p className="text-6xl font-bold text-accentdark">{score}</p>
-                </div>
-                {score >= Number(process.env.NEXT_PUBLIC_MIN_REQUIRED_SCORE) ? (
-                  <div className="mt-8">
-                    {!showZupass ? (
-                      <Button onClick={() => setShowZupass(true)} className="bg-accentdark text-zupass text-xl py-4 px-10 rounded-full hover:bg-accentdarker transition-colors">
-                        Connect Zupass
-                      </Button>
-                    ) : (
-                      user?.wallet?.address && accessToken && <DynamicWrapper wallet={user.wallet.address} token={accessToken} />
-                    )}
+        <header className="relative z-10 p-6 flex justify-between items-center">
+          <motion.div
+            initial={{ opacity: 0, y: -50 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="flex items-center space-x-4"
+          >
+            <Image
+              src="/zutalent.png"
+              alt="ZuTalent Logo"
+              width={50}
+              height={50}
+              className="rounded-full"
+            />
+            <span className="text-3xl font-bold text-accentdark">ZuTalent</span>
+          </motion.div>
+          {authenticated && (
+            <div className="flex items-center space-x-4">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  {ProfileAvatar(user?.wallet?.address || 'Unknown')}
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem>
+                    <Ticket className="mr-2 h-4 w-4" />
+                    <span>Your tickets</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <Plus className="mr-2 h-4 w-4" />
+                    <span>Get Hackathon ticket</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => logout()}>
+                    <LogOut className="mr-2 h-4 w-4" />
+                    <span>Disconnect</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          )}
+        </header>
+
+        <main className="relative z-10 flex-grow flex flex-col items-center justify-center p-8 text-center">
+          {!authenticated ? (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.5 }}
+              className="max-w-2xl mx-auto"
+            >
+              <Image
+                src="/zutalent.png"
+                alt="ZuTalent Logo"
+                width={150}
+                height={150}
+                className="mx-auto mb-8"
+              />
+              <h1 className="text-6xl font-bold mb-8 text-accentdark">
+                <TextGenerateEffect words="Welcome to ZuTalent" />
+              </h1>
+              <p className="text-2xl mb-12 text-accentdark">Unlock your potential with ZuTalent</p>
+              <Button
+                onClick={() => login()}
+                className="bg-accentdark text-zupass text-xl py-4 px-10 rounded-full hover:bg-accentdarker transition-all hover:scale-105"
+              >
+                Connect Wallet
+              </Button>
+            </motion.div>
+          ) : (
+            <div className="max-w-2xl mx-auto">
+              <h1 className="text-5xl font-bold mb-8 text-accentdark">Talent Dashboard</h1>
+              {isPassportLoading ? (
+                <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-accentdark"></div>
+              ) : passportError ? (
+                <p className="text-red-500">Error loading passport: {(passportError as Error).message}</p>
+              ) : passportData ? (
+                <div className="space-y-8">
+                  <div className="bg-gradient-to-br from-primarydark to-accentdark rounded-2xl p-8 shadow-lg flex items-center justify-between">
+                    <div className="text-left">
+                      <p className="text-2xl mb-2 text-zupass">Your ZuTalent Score</p>
+                      <p className="text-6xl font-bold text-zupass">{score}/{MAX_SCORE}</p>
+                    </div>
+                    <div className="w-32 h-32">
+                      <CircularProgressbar
+                        value={normalizedScore}
+                        maxValue={100}
+                        text={`${Math.round(normalizedScore)}%`}
+                        styles={buildStyles({
+                          textColor: '#ffffff',
+                          pathColor: '#ffd700',
+                          trailColor: 'rgba(255,255,255,0.2)',
+                        })}
+                      />
+                    </div>
                   </div>
-                ) : (
-                  <p className="text-xl mt-8">Reach a score of {process.env.NEXT_PUBLIC_MIN_REQUIRED_SCORE} or higher to obtain a ZuTalent. Keep building your skills!</p>
-                )}
-              </div>
-            ) : null}
-          </div>
-        )}
-      </main>
+                  {score >= Number(process.env.NEXT_PUBLIC_MIN_REQUIRED_SCORE) ? (
+                    <div className="mt-8">
+                      {!showZupass ? (
+                        <Button onClick={() => setShowZupass(true)} className="bg-accentdark text-zupass text-xl py-4 px-10 rounded-full hover:bg-accentdarker transition-colors">
+                          Connect Zupass
+                        </Button>
+                      ) : (
+                        user?.wallet?.address && accessToken && <DynamicWrapper wallet={user.wallet.address} token={accessToken} />
+                      )}
+                    </div>
+                  ) : (
+                    <p className="text-xl mt-8">Reach a score of {process.env.NEXT_PUBLIC_MIN_REQUIRED_SCORE} or higher to obtain a ZuTalent. Keep building your skills!</p>
+                  )}
+                </div>
+              ) : null}
+            </div>
+          )}
+        </main>
 
-      <footer className="p-6 text-center text-accentdark">
-        <p>&copy; 2023 ZuTalent. All rights reserved.</p>
-      </footer>
+        <footer className="relative z-10 p-6 text-center text-accentdark">
+          <p>&copy; 2024 ZuTalent. All rights reserved.</p>
+        </footer>
+      </motion.div>
     </div>
   );
 }

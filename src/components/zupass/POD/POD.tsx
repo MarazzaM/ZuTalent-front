@@ -5,6 +5,7 @@ import { useParcnetClient } from "./hooks/useParcnetClient";
 import { Button } from "@/components/ui/button";
 import * as p from "@parcnet-js/podspec";
 import Swal from 'sweetalert2';
+import { useState, useEffect } from "react";
 
 export function PODSection({ wallet, token }: { wallet: string; token: string }): ReactNode {
   const { z, connected } = useParcnetClient();
@@ -17,6 +18,31 @@ export function PODSection({ wallet, token }: { wallet: string; token: string })
 }
 
 function InsertPOD({ z, wallet, token }: { z: ParcnetAPI; wallet: string; token: string }): ReactNode {
+  const [hasTicket, setHasTicket] = useState<boolean | null>(null);
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    checkExistingTicket();
+  }, []);
+
+  const checkExistingTicket = async () => {
+    try {
+      const query = p.pod({
+        entries: {
+          issuedBy: {
+            type: "string",
+            equalsEntry: "Jupiter"
+          }
+        }
+      });
+      const existingPods = await z.pod.query(query);
+      setHasTicket(existingPods.length > 0);
+    } catch (error) {
+      console.error('Error checking for existing ticket:', error);
+      setHasTicket(null);
+    }
+  };
+
   const issueZuTalentTicket = async () => {
     try {
       // Query for existing POD
@@ -63,6 +89,9 @@ function InsertPOD({ z, wallet, token }: { z: ParcnetAPI; wallet: string; token:
         icon: 'success',
       });
 
+      // After successfully issuing the ticket:
+      setHasTicket(true);
+
     } catch (error) {
       console.error('Error processing ZuTalent ticket:', error);
       await Swal.fire({
@@ -72,6 +101,14 @@ function InsertPOD({ z, wallet, token }: { z: ParcnetAPI; wallet: string; token:
       });
     }
   };
+
+  if (hasTicket === null) {
+    return <div>Checking ticket status...</div>;
+  }
+
+  if (hasTicket) {
+    return <div>You already have a ZuTalent ticket!</div>;
+  }
 
   return (
     <div>
