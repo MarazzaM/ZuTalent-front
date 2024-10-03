@@ -136,8 +136,23 @@ function Page() {
       });
       
       if (response.ok) {
-        const url = await response.text();
-        window.open(url, '_blank');
+        const data = await response.json();
+        if (data.url) {
+          Swal.fire({
+            title: 'You are eligible for a Zupass!',
+            text: 'Would you like to open the Zupass link?',
+            icon: 'success',
+            showCancelButton: true,
+            confirmButtonText: 'Open Zupass',
+            cancelButtonText: 'Close'
+          }).then((result) => {
+            if (result.isConfirmed) {
+              window.open(data.url, '_blank');
+            }
+          });
+        } else {
+          throw new Error('URL not found in response');
+        }
       } else {
         Swal.fire({
           title: 'Not Registered',
