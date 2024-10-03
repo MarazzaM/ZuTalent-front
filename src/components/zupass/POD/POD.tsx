@@ -21,9 +21,11 @@ export function PODSection({ wallet, token }: { wallet: string; token: string })
 
 function InsertPOD({ z, wallet, token }: { z: ParcnetAPI; wallet: string; token: string }): ReactNode {
   const [hasTicket, setHasTicket] = useState<boolean | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [ticketData, setTicketData] = useState<any>(null);
   const [isVerifying, setIsVerifying] = useState(false);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     checkExistingTicket();
   }, []);
@@ -112,8 +114,10 @@ function InsertPOD({ z, wallet, token }: { z: ParcnetAPI; wallet: string; token:
 
       // After successfully issuing the ticket:
       setHasTicket(true);
-
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
+      // Ignore unused 'error' variable
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       await Swal.fire({
         title: 'Error',
         text: 'An error occurred while processing your ZuTalent ticket.',
