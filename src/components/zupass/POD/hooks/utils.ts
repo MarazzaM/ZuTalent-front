@@ -5,7 +5,7 @@ export function cn(...classes: string[]): string {
 }
 
 export const DEFAULT_CONNECTION_INFO: ClientConnectionInfo = {
-  url: "https://staging.zupass.org",
+  url: "https://zupass.org",
   type: "iframe"
 };
 

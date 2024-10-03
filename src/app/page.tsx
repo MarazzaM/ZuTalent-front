@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { usePrivy } from '@privy-io/react-auth';
+import { usePrivy, useLinkAccount } from '@privy-io/react-auth';
 import { Button } from "@/components/ui/button";
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -61,7 +61,6 @@ function Page() {
   const [showZupass, setShowZupass] = useState(false);
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-
   useEffect(() => {
     if (ready) {
       const timer = setTimeout(() => {
@@ -87,6 +86,76 @@ function Page() {
     enabled: !!user?.wallet?.address && authenticated, // Only run the query if we have a wallet address and the user is authenticated
   });
   const score = passportData?.passport.score;
+
+  const { linkEmail } = useLinkAccount({
+    onSuccess: (user, linkMethod, linkedAccount) => {
+      console.log('Email linked successfully:', linkedAccount);
+      Swal.fire({
+        title: 'Success',
+        text: 'Email linked successfully. You can now get your hackathon ticket.',
+        icon: 'success',
+        confirmButtonText: 'OK'
+      }).then(() => {
+        // Proceed to get the hackathon ticket
+        handleGetHackathonTicketAfterEmailLink();
+      });
+    },
+    onError: (error, details) => {
+      console.error('Error linking email:', error, details);
+      Swal.fire({
+        title: 'Error',
+        text: 'Failed to link email. Please try again.',
+        icon: 'error',
+        confirmButtonText: 'OK'
+      });
+    }
+  });
+
+  const handleGetHackathonTicket = async () => {
+    if (!user?.email) {
+      try {
+        await linkEmail();
+        // The success and error handling will be done in the callbacks
+      } catch (error) {
+        console.error('Error initiating email link:', error);
+      }
+    } else {
+      handleGetHackathonTicketAfterEmailLink();
+    }
+  };
+
+  const handleGetHackathonTicketAfterEmailLink = async () => {
+    try {
+      if (!user || !user?.email?.address) {
+        throw new Error('User email not available');
+      }
+      const response = await fetch(`${process.env.NEXT_PUBLIC_JUPITER_API_URL}/attendees/${user.email.address}`, {
+        headers: {
+          'Authorization': `Bearer ${accessToken}`
+        }
+      });
+      
+      if (response.ok) {
+        const url = await response.text();
+        window.open(url, '_blank');
+      } else {
+        Swal.fire({
+          title: 'Not Registered',
+          text: 'You didn\'t register for the hackathon!',
+          icon: 'warning',
+          confirmButtonText: 'OK'
+        });
+      }
+    } catch (error) {
+      console.error('Error checking hackathon registration:', error);
+      Swal.fire({
+        title: 'Error',
+        text: 'Failed to check hackathon registration. Please try again.',
+        icon: 'error',
+        confirmButtonText: 'OK'
+      });
+    }
+  };
 
   return (
     <div className="bg-zupass min-h-screen overflow-hidden">
@@ -162,7 +231,7 @@ function Page() {
                   </DropdownMenuItem>
                   <DropdownMenuItem>
                     <Plus className="mr-2 h-4 w-4" />
-                    <span>Get Hackathon ticket</span>
+                    <span onClick={handleGetHackathonTicket}>Get Hackathon ticket</span>
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => logout()}>
                     <LogOut className="mr-2 h-4 w-4" />
