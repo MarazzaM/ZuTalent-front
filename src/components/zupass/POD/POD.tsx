@@ -6,7 +6,9 @@ import { Button } from "@/components/ui/button";
 import * as p from "@parcnet-js/podspec";
 import Swal from 'sweetalert2';
 import { useState, useEffect } from "react";
-
+import { CardContainer, CardBody, CardItem } from "@/components/ui/3d-card";
+import Image from 'next/image';
+import ZutalentLogo from "@/../public/zutalent.png";
 export function PODSection({ wallet, token }: { wallet: string; token: string }): ReactNode {
   const { z, connected } = useParcnetClient();
 
@@ -19,8 +21,9 @@ export function PODSection({ wallet, token }: { wallet: string; token: string })
 
 function InsertPOD({ z, wallet, token }: { z: ParcnetAPI; wallet: string; token: string }): ReactNode {
   const [hasTicket, setHasTicket] = useState<boolean | null>(null);
+  const [ticketData, setTicketData] = useState<any>(null);
+  const [isVerifying, setIsVerifying] = useState(false);
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     checkExistingTicket();
   }, []);
@@ -31,12 +34,30 @@ function InsertPOD({ z, wallet, token }: { z: ParcnetAPI; wallet: string; token:
         entries: {
           issuedBy: {
             type: "string",
-            equalsEntry: "Jupiter"
+            equalsEntry: "ZuTalent"
+          },
+          zupass_display: {
+            type: "string",
+            equalsEntry: "ZuTalent"
+          },
+          zupass_title: {
+            type: "string",
+            equalsEntry: "ZuTalent"
+          },
+          zupass_image_url: {
+            type: "string",
+            equalsEntry: "ZuTalent"
           }
         }
       });
       const existingPods = await z.pod.query(query);
-      setHasTicket(existingPods.length > 0);
+      console.log("existingPods", existingPods);
+      if (existingPods.length > 0) {
+        setHasTicket(true);
+        setTicketData(existingPods[0]);
+      } else {
+        setHasTicket(false);
+      }
     } catch (error) {
       console.error('Error checking for existing ticket:', error);
       setHasTicket(null);
@@ -50,12 +71,12 @@ function InsertPOD({ z, wallet, token }: { z: ParcnetAPI; wallet: string; token:
         entries: {
           issuedBy: {
             type: "string",
-            equalsEntry: "Jupiter"
+            equalsEntry: "ZuTalent"
           }
         }
       });
       const existingPods = await z.pod.query(query);
-
+      console.log("existingPods", existingPods);
       if (existingPods.length > 0) {
         // User already has a ZuTalent ticket
         await Swal.fire({
@@ -93,7 +114,6 @@ function InsertPOD({ z, wallet, token }: { z: ParcnetAPI; wallet: string; token:
       setHasTicket(true);
 
     } catch (error) {
-      console.error('Error processing ZuTalent ticket:', error);
       await Swal.fire({
         title: 'Error',
         text: 'An error occurred while processing your ZuTalent ticket.',
@@ -102,12 +122,122 @@ function InsertPOD({ z, wallet, token }: { z: ParcnetAPI; wallet: string; token:
     }
   };
 
+  const verifySignature = async () => {
+    setIsVerifying(true);
+    try {
+      const isValid = ticketData.verifySignature();
+      if (isValid) {
+        await Swal.fire({
+          title: 'Signature Verified',
+          text: 'The ticket signature is valid.',
+          icon: 'success',
+        });
+      } else {
+        await Swal.fire({
+          title: 'Invalid Signature',
+          text: 'The ticket signature could not be verified.',
+          icon: 'error',
+        });
+      }
+    } catch (error) {
+      console.error('Error verifying signature:', error);
+      await Swal.fire({
+        title: 'Verification Error',
+        text: 'An error occurred while verifying the signature.',
+        icon: 'error',
+      });
+    } finally {
+      setIsVerifying(false);
+    }
+  };
+
   if (hasTicket === null) {
-    return <div>Checking ticket status...</div>;
+    return <div>Error checking ticket status. Please try again.</div>;
   }
 
-  if (hasTicket) {
-    return <div>You already have a ZuTalent ticket!</div>;
+  if (hasTicket && ticketData) {
+    const entries = ticketData._content._map;
+    console.log("Ticket entries:", entries);
+
+    const getEntryValue = (key: string) => {
+      const entry = entries.get(key);
+      console.log(`Entry for ${key}:`, entry);
+
+      if (!entry) return '';
+      
+      try {
+        if (typeof entry.value === 'string') {
+          const parsedValue = JSON.parse(entry.value);
+          return parsedValue.value || '';
+        } else if (typeof entry.value === 'object' && entry.value !== null) {
+          return entry.value.value || '';
+        } else {
+          return String(entry.value);
+        }
+      } catch (error) {
+        console.error(`Error parsing value for ${key}:`, error);
+        return String(entry.value);
+      }
+    };
+
+    return (
+      <CardContainer className="inter-var">
+        <CardBody className="bg-gradient-to-br from-primarydark to-accentdark relative group/card dark:hover:shadow-2xl dark:hover:shadow-emerald-500/[0.1] dark:bg-black dark:border-white/[0.2] border-black/[0.1] w-auto sm:w-[30rem] h-auto rounded-xl p-6 border">
+          <CardItem
+            translateZ="50"
+            className="text-2xl font-bold text-zupass text-center w-full"
+          >
+            {getEntryValue('zupass_title')}
+          </CardItem>
+          <CardItem
+            as="p"
+            translateZ="60"
+            className="text-zupass text-sm max-w-sm mt-2 text-center"
+          >
+            Issued by: {getEntryValue('issuedBy')}
+          </CardItem>
+          <CardItem translateZ="100" className="w-full mt-4">
+            <Image
+              src={ZutalentLogo}
+              height={200}
+              width={200}
+              className="h-60 w-60 object-cover rounded-xl group-hover/card:shadow-xl mx-auto"
+              alt="ZuTalent Ticket"
+            />
+          </CardItem>
+          <CardItem
+            translateZ="50"
+            className="text-zupass text-center text-sm font-normal max-w-xs mx-auto mt-4"
+          >
+            {getEntryValue('zupass_display')}
+          </CardItem>
+          <CardItem
+            translateZ="50"
+            className="text-zupass text-center text-xs font-normal max-w-xs mx-auto mt-2"
+          >
+            Wallet: {getEntryValue('wallet')}
+          </CardItem>
+          <CardItem
+            translateZ="50"
+            className="text-zupass text-center text-xs font-normal max-w-xs mx-auto mt-1"
+          >
+            Issued: {new Date(parseInt(getEntryValue('timestamp'))).toLocaleString()}
+          </CardItem>
+          <CardItem
+            translateZ="50"
+            className="w-full mt-4"
+          >
+            <Button 
+              onClick={verifySignature} 
+              disabled={isVerifying}
+              className="w-full bg-accentdark text-zupass hover:bg-accentdarker transition-colors"
+            >
+              {isVerifying ? 'Verifying...' : 'Verify Signature'}
+            </Button>
+          </CardItem>
+        </CardBody>
+      </CardContainer>
+    );
   }
 
   return (

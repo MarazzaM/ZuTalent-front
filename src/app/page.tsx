@@ -22,10 +22,10 @@ import {
 import { Ticket, Plus, LogOut } from 'lucide-react';
 import { CircularProgressbar, buildStyles } from 'react-circular-progressbar';
 import 'react-circular-progressbar/dist/styles.css';
+import { Loader2 } from 'lucide-react';
 
 const DynamicWrapper = dynamic(() => import('@/components/zupass/POD/Wrapper'), {
   ssr: false,
-  loading: () => <p>Loading...</p>
 });
 
 // Function to fetch passport data
@@ -42,14 +42,6 @@ const fetchPassport = async (walletAddress: string, getAccessToken: () => Promis
   const data = await response.json();
   
   if (!response.ok) {
-    if (data.statusCode === 400 && data.message.includes("Insufficient score")) {
-      Swal.fire({
-        title: 'Insufficient Score',
-        text: `Your score is not high enough. The minimum required score is ${process.env.NEXT_PUBLIC_MIN_REQUIRED_SCORE}.`,
-        icon: 'warning',
-        confirmButtonText: 'OK'
-      });
-    }
     throw new Error(data.message || 'Network response was not ok');
   }
   
@@ -61,6 +53,7 @@ function Page() {
   const [showZupass, setShowZupass] = useState(false);
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isZupassLoading, setIsZupassLoading] = useState(false);
   useEffect(() => {
     if (ready) {
       const timer = setTimeout(() => {
@@ -172,6 +165,22 @@ function Page() {
     }
   };
 
+  const handleShowZupass = () => {
+    setIsZupassLoading(true);
+    setShowZupass(true);
+  };
+
+  useEffect(() => {
+    if (showZupass) {
+      // Set a timeout to simulate the loading time of the DynamicWrapper
+      const timer = setTimeout(() => {
+        setIsZupassLoading(false);
+      }, 3000); // Adjust this time as needed
+
+      return () => clearTimeout(timer);
+    }
+  }, [showZupass]);
+
   return (
     <div className="bg-zupass min-h-screen overflow-hidden">
       <AnimatePresence mode="wait">
@@ -241,10 +250,6 @@ function Page() {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
                   <DropdownMenuItem>
-                    <Ticket className="mr-2 h-4 w-4" />
-                    <span>Your tickets</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem>
                     <Plus className="mr-2 h-4 w-4" />
                     <span onClick={handleGetHackathonTicket}>Get Hackathon ticket</span>
                   </DropdownMenuItem>
@@ -311,19 +316,20 @@ function Page() {
                       />
                     </div>
                   </div>
-                  {score >= Number(process.env.NEXT_PUBLIC_MIN_REQUIRED_SCORE) ? (
-                    <div className="mt-8">
-                      {!showZupass ? (
-                        <Button onClick={() => setShowZupass(true)} className="bg-accentdark text-zupass text-xl py-4 px-10 rounded-full hover:bg-accentdarker transition-colors">
-                          Connect Zupass
-                        </Button>
-                      ) : (
-                        user?.wallet?.address && accessToken && <DynamicWrapper wallet={user.wallet.address} token={accessToken} />
-                      )}
-                    </div>
-                  ) : (
-                    <p className="text-xl mt-8">Reach a score of {process.env.NEXT_PUBLIC_MIN_REQUIRED_SCORE} or higher to obtain a ZuTalent. Keep building your skills!</p>
-                  )}
+                  <div className="mt-8">
+                    {!showZupass ? (
+                      <Button onClick={handleShowZupass} className="bg-accentdark text-zupass text-xl py-4 px-10 rounded-full hover:bg-accentdarker transition-colors">
+                        Connect Zupass
+                      </Button>
+                    ) : isZupassLoading ? (
+                      <div className="flex items-center justify-center space-x-2">
+                        <Loader2 className="h-6 w-6 animate-spin" />
+                        <span>Loading Zupass integration...</span>
+                      </div>
+                    ) : (
+                      user?.wallet?.address && accessToken && <DynamicWrapper wallet={user.wallet.address} token={accessToken} />
+                    )}
+                  </div>
                 </div>
               ) : null}
             </div>

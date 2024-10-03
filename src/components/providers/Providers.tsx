@@ -21,8 +21,8 @@ export default function Providers({ children }: { children: React.ReactNode }) {
                 appearance: {
                     theme: 'light',
                     accentColor: '#19473f',
-                    logo: '/juno.svg',
-                    landingHeader: `Welcome to Juno`,
+                    logo: '/zutalent.png',
+                    landingHeader: `Welcome to ZuTalent`,
                 },
                 // Create embedded wallets for users who don't have a wallet
                 embeddedWallets: {

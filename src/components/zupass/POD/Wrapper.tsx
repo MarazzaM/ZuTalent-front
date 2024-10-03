@@ -5,7 +5,7 @@ import { ParcnetClientProvider } from "./hooks/useParcnetClient";
 import { PODSection } from "./POD";
 
 const zapp = {
-  name: "Juno",
+  name: "ZuTalent",
   permissions: ["read", "write"]
 };
 
