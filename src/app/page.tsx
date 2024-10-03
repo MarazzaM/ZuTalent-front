@@ -20,6 +20,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Ticket, Plus, LogOut } from 'lucide-react';
+import { CircularProgressbar, buildStyles } from 'react-circular-progressbar';
+import 'react-circular-progressbar/dist/styles.css';
 
 const DynamicWrapper = dynamic(() => import('@/components/zupass/POD/Wrapper'), {
   ssr: false,
@@ -85,6 +87,9 @@ function Page() {
     enabled: !!user?.wallet?.address && authenticated, // Only run the query if we have a wallet address and the user is authenticated
   });
   const score = passportData?.passport.score;
+
+  const MAX_SCORE = 40;
+  const normalizedScore = (score / MAX_SCORE) * 100; // Convert score to percentage
 
   return (
     <div className="bg-zupass min-h-screen overflow-hidden">
@@ -200,16 +205,30 @@ function Page() {
             </motion.div>
           ) : (
             <div className="max-w-2xl mx-auto">
-              <h1 className="text-5xl font-bold mb-8 text-accentdark">Your ZuTalent Dashboard</h1>
+              <h1 className="text-5xl font-bold mb-8 text-accentdark">Talent Dashboard</h1>
               {isPassportLoading ? (
                 <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-accentdark"></div>
               ) : passportError ? (
                 <p className="text-red-500">Error loading passport: {(passportError as Error).message}</p>
               ) : passportData ? (
                 <div className="space-y-8">
-                  <div className="bg-primarydark rounded-lg p-8 shadow-lg">
-                    <p className="text-3xl mb-4">Your ZuTalent Score</p>
-                    <p className="text-6xl font-bold text-accentdark">{score}</p>
+                  <div className="bg-gradient-to-br from-primarydark to-accentdark rounded-2xl p-8 shadow-lg flex items-center justify-between">
+                    <div className="text-left">
+                      <p className="text-2xl mb-2 text-zupass">Your ZuTalent Score</p>
+                      <p className="text-6xl font-bold text-zupass">{score}/{MAX_SCORE}</p>
+                    </div>
+                    <div className="w-32 h-32">
+                      <CircularProgressbar
+                        value={normalizedScore}
+                        maxValue={100}
+                        text={`${Math.round(normalizedScore)}%`}
+                        styles={buildStyles({
+                          textColor: '#ffffff',
+                          pathColor: '#ffd700',
+                          trailColor: 'rgba(255,255,255,0.2)',
+                        })}
+                      />
+                    </div>
                   </div>
                   {score >= Number(process.env.NEXT_PUBLIC_MIN_REQUIRED_SCORE) ? (
                     <div className="mt-8">
