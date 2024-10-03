@@ -20,6 +20,7 @@ export function PODSection({ wallet, token }: { wallet: string; token: string })
 function InsertPOD({ z, wallet, token }: { z: ParcnetAPI; wallet: string; token: string }): ReactNode {
   const [hasTicket, setHasTicket] = useState<boolean | null>(null);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     checkExistingTicket();
   }, []);
