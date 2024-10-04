@@ -167,6 +167,7 @@ function InsertPOD({ z, wallet, token }: { z: ParcnetAPI; wallet: string; token:
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
         },
         body: serializedTicketData,
       });
