@@ -9,6 +9,7 @@ import { useState, useEffect } from "react";
 import { CardContainer, CardBody, CardItem } from "@/components/ui/3d-card";
 import Image from 'next/image';
 import ZutalentLogo from "@/../public/zutalent.png";
+
 export function PODSection({ wallet, token }: { wallet: string; token: string }): ReactNode {
   const { z, connected } = useParcnetClient();
 
@@ -23,7 +24,9 @@ function InsertPOD({ z, wallet, token }: { z: ParcnetAPI; wallet: string; token:
   const [hasTicket, setHasTicket] = useState<boolean | null>(null);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [ticketData, setTicketData] = useState<any>(null);
+  console.log("ticketData", ticketData);
   const [isVerifying, setIsVerifying] = useState(false);
+  const [isAttesting, setIsAttesting] = useState(false);
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
@@ -126,7 +129,7 @@ function InsertPOD({ z, wallet, token }: { z: ParcnetAPI; wallet: string; token:
     }
   };
 
-  const verifySignature = async () => {
+  const verifySignature: () => Promise<void> = async () => {
     setIsVerifying(true);
     try {
       const isValid = ticketData.verifySignature();
@@ -152,6 +155,61 @@ function InsertPOD({ z, wallet, token }: { z: ParcnetAPI; wallet: string; token:
       });
     } finally {
       setIsVerifying(false);
+    }
+  };
+
+  const attestOnBase = async () => {
+    setIsAttesting(true);
+    try {
+      const serializedTicketData = ticketData.serialize();
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_JUPITER_API_URL}/attestation`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: serializedTicketData,
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        let attestationId;
+
+        if (result.message === "New attestation created") {
+          attestationId = result.attestationUID;
+        } else if (result.message === "Attestation already exists for this nullifier") {
+          attestationId = result.existingAttestation.id;
+        }
+
+        if (attestationId) {
+          const attestationUrl = `https://base-sepolia.easscan.org/attestation/view/${attestationId}`;
+          await Swal.fire({
+            title: 'Attestation Successful',
+            text: 'Your ticket has been attested on Base.',
+            icon: 'success',
+            showCancelButton: true,
+            confirmButtonText: 'Go to Attestation',
+            cancelButtonText: 'Close',
+          }).then((result) => {
+            if (result.isConfirmed) {
+              window.open(attestationUrl, '_blank');
+            }
+          });
+        } else {
+          throw new Error('Attestation ID not found in response');
+        }
+      } else {
+        throw new Error('Attestation failed');
+      }
+    } catch (error) {
+      console.error('Error attesting on Base:', error);
+      await Swal.fire({
+        title: 'Attestation Error',
+        text: 'An error occurred while attesting on Base.',
+        icon: 'error',
+      });
+    } finally {
+      setIsAttesting(false);
     }
   };
 
@@ -229,14 +287,21 @@ function InsertPOD({ z, wallet, token }: { z: ParcnetAPI; wallet: string; token:
           </CardItem>
           <CardItem
             translateZ="50"
-            className="w-full mt-4"
+            className="w-full mt-4 flex space-x-2"
           >
             <Button 
               onClick={verifySignature} 
               disabled={isVerifying}
-              className="w-full bg-accentdark text-zupass hover:bg-accentdarker transition-colors"
+              className="w-1/2 bg-accentdark text-zupass hover:bg-accentdarker transition-colors"
             >
               {isVerifying ? 'Verifying...' : 'Verify Signature'}
+            </Button>
+            <Button 
+              onClick={attestOnBase} 
+              disabled={isAttesting}
+              className="w-1/2 bg-accentdark text-zupass hover:bg-accentdarker transition-colors"
+            >
+              {isAttesting ? 'Attesting...' : 'Attest on Base'}
             </Button>
           </CardItem>
         </CardBody>
