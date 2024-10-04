@@ -276,7 +276,7 @@ function Page() {
                 alt="ZuTalent Logo"
                 width={150}
                 height={150}
-                className="mx-auto mb-8"
+                className="mx-auto mb-8 rounded-full"
               />
               <h1 className="text-6xl font-bold mb-8 text-accentdark">
                 <TextGenerateEffect words="Welcome to ZuTalent" />
