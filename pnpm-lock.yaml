@@ -15,8 +15,8 @@ importers:
         specifier: ^9.2.2
         version: 9.2.2
       '@parcnet-js/app-connector':
-        specifier: 0.0.9-next.0
-        version: 0.0.9-next.0(bufferutil@4.0.8)(typescript@5.6.2)(utf-8-validate@5.0.10)
+        specifier: 0.0.8
+        version: 0.0.8(bufferutil@4.0.8)(typescript@5.6.2)(utf-8-validate@5.0.10)
       '@parcnet-js/podspec':
         specifier: ^0.0.4
         version: 0.0.4(bufferutil@4.0.8)(utf-8-validate@5.0.10)
@@ -782,17 +782,14 @@ packages:
     resolution: {integrity: sha512-HNjmfLQEVRZmHRET336f20H/8kOozUGwk7yajvsonjNxbj2wBTK1WsQuHkD5yYh9RxFGL2EyDHryOihOwUoKDA==}
     engines: {node: '>= 10.0.0'}
 
-  '@parcnet-js/app-connector@0.0.9-next.0':
-    resolution: {integrity: sha512-2/FXNMHRcdebvebq387rY9sz3OgbS2OGy0r/496/plz4EkyCu/c8a+eTpGVSXWbB1M8jOyRIST+k7lI/jE4YNw==}
+  '@parcnet-js/app-connector@0.0.8':
+    resolution: {integrity: sha512-XLpHFD7SfwJb+c/0UFwnfsSW3jvHZCHgJ6XvqbXMVR/tKSCEoHXNKvBKyOHCi9FmyEkd2/aue69d3qU7hz/bxg==}
 
-  '@parcnet-js/client-rpc@0.0.6-next.0':
-    resolution: {integrity: sha512-NX7/RkvOMTg+XsuB/6PMIPE4swTL0ccSpb/HN7RN4lKwVPOpAy2NIwXovVg4ntUZSmLayomM4WPlxPA8JFMDvg==}
+  '@parcnet-js/client-rpc@0.0.5':
+    resolution: {integrity: sha512-FihFd8gWD2c7rsvRVCkUxR/wo7VsRG0RwMO/PpHcRcSe9mzQ11v4zqgXVQMIhSSa6tT73nUK97dUzoRDdgHYmQ==}
 
   '@parcnet-js/podspec@0.0.4':
     resolution: {integrity: sha512-wy263kp8VRMY7D2x/6RiUXiJf3WBybETwGx5PGqB761OEjpRoYQMbN3Nd4Um4opRC0bJQPRG98IbsRZIr0xrjg==}
-
-  '@parcnet-js/podspec@0.0.5-next.0':
-    resolution: {integrity: sha512-myMIPUXKMtLwtWI4VId6GmxeJLeuC+QxIOZvu1h2TZgI8H9Esx4HlszvGj1QT4rHBEp50+ijN/QPL76wAJXedQ==}
 
   '@pcd/circom_runtime@0.1.28':
     resolution: {integrity: sha512-TRWFEZoFngWW6xvEGdiem9llmK47ZhPXN+gfVETpVZw29tVYVkDMEBrPiUycK6vvHp0IINZkceK426GrO28nfg==}
@@ -5265,11 +5262,11 @@ snapshots:
       '@parcel/watcher-win32-ia32': 2.4.1
       '@parcel/watcher-win32-x64': 2.4.1
 
-  '@parcnet-js/app-connector@0.0.9-next.0(bufferutil@4.0.8)(typescript@5.6.2)(utf-8-validate@5.0.10)':
+  '@parcnet-js/app-connector@0.0.8(bufferutil@4.0.8)(typescript@5.6.2)(utf-8-validate@5.0.10)':
     dependencies:
       '@brenoroosevelt/toast': 2.0.3
-      '@parcnet-js/client-rpc': 0.0.6-next.0(bufferutil@4.0.8)(typescript@5.6.2)(utf-8-validate@5.0.10)
-      '@parcnet-js/podspec': 0.0.5-next.0(bufferutil@4.0.8)(utf-8-validate@5.0.10)
+      '@parcnet-js/client-rpc': 0.0.5(bufferutil@4.0.8)(typescript@5.6.2)(utf-8-validate@5.0.10)
+      '@parcnet-js/podspec': 0.0.4(bufferutil@4.0.8)(utf-8-validate@5.0.10)
       '@pcd/gpc': 0.0.8(bufferutil@4.0.8)(utf-8-validate@5.0.10)
       '@pcd/pod': 0.1.7
       nanoevents: 9.0.0
@@ -5279,9 +5276,9 @@ snapshots:
       - typescript
       - utf-8-validate
 
-  '@parcnet-js/client-rpc@0.0.6-next.0(bufferutil@4.0.8)(typescript@5.6.2)(utf-8-validate@5.0.10)':
+  '@parcnet-js/client-rpc@0.0.5(bufferutil@4.0.8)(typescript@5.6.2)(utf-8-validate@5.0.10)':
     dependencies:
-      '@parcnet-js/podspec': 0.0.5-next.0(bufferutil@4.0.8)(utf-8-validate@5.0.10)
+      '@parcnet-js/podspec': 0.0.4(bufferutil@4.0.8)(utf-8-validate@5.0.10)
       '@pcd/gpc': 0.0.8(bufferutil@4.0.8)(utf-8-validate@5.0.10)
       '@pcd/pod': 0.1.7
       valibot: 0.42.1(typescript@5.6.2)
@@ -5291,14 +5288,6 @@ snapshots:
       - utf-8-validate
 
   '@parcnet-js/podspec@0.0.4(bufferutil@4.0.8)(utf-8-validate@5.0.10)':
-    dependencies:
-      '@pcd/gpc': 0.0.8(bufferutil@4.0.8)(utf-8-validate@5.0.10)
-      '@pcd/pod': 0.1.7
-    transitivePeerDependencies:
-      - bufferutil
-      - utf-8-validate
-
-  '@parcnet-js/podspec@0.0.5-next.0(bufferutil@4.0.8)(utf-8-validate@5.0.10)':
     dependencies:
       '@pcd/gpc': 0.0.8(bufferutil@4.0.8)(utf-8-validate@5.0.10)
       '@pcd/pod': 0.1.7

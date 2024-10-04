@@ -11,7 +11,7 @@
   "dependencies": {
     "@dicebear/collection": "^9.2.2",
     "@dicebear/core": "^9.2.2",
-    "@parcnet-js/app-connector": "0.0.9-next.0",
+    "@parcnet-js/app-connector": "0.0.8",
     "@parcnet-js/podspec": "^0.0.4",
     "@pcd/passport-interface": "^0.11.9",
     "@pcd/pod": "^0.1.7",
