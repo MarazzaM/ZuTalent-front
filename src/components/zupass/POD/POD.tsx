@@ -62,10 +62,12 @@ function InsertPOD({ z, wallet, token }: { z: ParcnetAPI; wallet: string; token:
         setTicketData(existingPods[0]);
       } else {
         setHasTicket(false);
+        setTicketData(null);
       }
     } catch (error) {
       console.error('Error checking for existing ticket:', error);
       setHasTicket(null);
+      setTicketData(null);
     }
   };
 
@@ -108,6 +110,10 @@ function InsertPOD({ z, wallet, token }: { z: ParcnetAPI; wallet: string; token:
       // Save POD to Zupass
       await z.pod.insert(podObject);
 
+      // Update state immediately to display the new ticket
+      setHasTicket(true);
+      setTicketData(podObject);
+
       // Show success message
       await Swal.fire({
         title: 'Success',
@@ -115,12 +121,13 @@ function InsertPOD({ z, wallet, token }: { z: ParcnetAPI; wallet: string; token:
         icon: 'success',
       });
 
-      // After successfully issuing the ticket:
-      setHasTicket(true);
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    } catch (error) {
+      // Re-check for existing ticket after successful issuance
+      // This is now optional, as we've already updated the state
+      await checkExistingTicket();
+
       // Ignore unused 'error' variable
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch (error) {
       await Swal.fire({
         title: 'Error',
         text: 'An error occurred while processing your ZuTalent ticket.',
